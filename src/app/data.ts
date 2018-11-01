@@ -259,15 +259,15 @@ export function generateGraph(nodeCount: number): Graph {
       }
     });
     for (let j = 0; j < nodes.length - 1; j++) {
-      if (Math.random() < 0.7) {
         edges.push({
           id: id(),
           source: nodes[i].id,
           target: nodes[j].id,
-          label: 'on success'
+          label: ''
         });
-      }
     }
   }
+
+  console.log(edges, nodes);
   return { edges, nodes };
 }

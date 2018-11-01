@@ -1,10 +1,34 @@
 <main [class]="theme">
   <div class="chart-col">
     <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
-      <ngx-graph *ngIf="graph" #graphEl class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
-        [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
-        [links]="graph.edges" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="graph.nodes" [clusters]="graph.clusters" [scheme]="colorScheme"
-        [layout]="customLayout || layoutId" [layoutSettings]="{orientation: orientation}" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
+      <ngx-graph 
+        *ngIf="graph" #graphEl 
+        class="chart-container" 
+        [view]="view" 
+        [enableZoom]="enableZoom" 
+        [autoZoom]="autoZoom" 
+        [panOnZoom]="panOnZoom"
+        [panOffsetX]="panOffsetX" 
+        [panOffsetY]="panOffsetY" 
+        [zoomLevel]="zoomLevel" 
+        [autoCenter]="autoCenter" 
+        [legend]="showLegend"
+        [links]="graph.edges" 
+        (legendLabelClick)="onLegendLabelClick($event)" 
+        [nodes]="graph.nodes" 
+        [clusters]="graph.clusters" 
+        [scheme]="colorScheme"
+        [layout]="customLayout || layoutId" 
+        [layoutSettings]="{orientation: orientation, 
+                            curve: curve, 
+                            scheme: colorScheme,
+                            panOffsetX: panOffsetX,
+                            panOffsetY: panOffsetY}" 
+        [curve]="curve" 
+        [update$]="update$" 
+        [zoomToFit$]="zoomToFit$" 
+        [center$]="center$" 
+        (select)="select($event)">
 
         <ng-template #defsTemplate>
           <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
@@ -42,13 +66,13 @@
   </div>
   <div class="sidebar">
     <h1>
-      NGX-
-      <strong>Graph</strong>
-      <small class="subtitle">Graph Visualization for Angular</small>
+      Flow
+      <strong>Canvas</strong>
+      <small class="subtitle">Drag objects with canvas</small>
     </h1>
 
     <div class="sidebar-body">
-      <h3>Theme</h3>
+      <!-- <h3>Theme</h3>
       <select [ngModel]="theme" (ngModelChange)="theme = $event">>
         <option [value]="'dark'">Dark</option>
         <option [value]="'light'">Light</option>
@@ -124,8 +148,64 @@
         <label>
           <input type="checkbox" [checked]="autoCenter" (change)="toggleFitContainer(fitContainer, autoZoom, $event.target.checked)"> Auto Center
         </label>
+      </div> -->
+      <h3 (click)="addNodeVisible = !addNodeVisible"  style="cursor: pointer">
+        <span [class.arrow-down]="addNodeVisible" [class.arrow-right]="!addNodeVisible">
+        </span>
+        <strong>Add Node</strong>
+      </h3>
+      <div class="form" [hidden]="!addNodeVisible">
+        <form class="form text-left" name="addNodeForm" [formGroup]="addNodeForm" (ngSubmit)="addNode()">
+            
+            <div class="input-group">
+                <label>Label:</label>
+                <input type="text" class="form-control" placeholder="Label" formControlName="label" >
+            </div>
+
+            <div class="input-group">
+              <label>Color:</label>
+              <input type="text" class="form-control" placeholder="Color" formControlName="color" >
+            </div>
+            <button type="submit" [disabled]="addNodeForm.invalid" class="btn btn-default">Add</button>
+        </form>
       </div>
 
+      <h3 (click)="addLineVisible = !addLineVisible"  style="cursor: pointer">
+        <span [class.arrow-down]="addLineVisible" [class.arrow-right]="!addLineVisible">
+        </span>
+        <strong>Add Line</strong>
+      </h3>
+      <div class="form" [hidden]="!addLineVisible">
+        <form class="form text-left" name="addLineForm" [formGroup]="addLineForm" (ngSubmit)="addLine()">
+            
+            <div class="input-group">
+                <label>Label:</label>
+                <input type="text" class="form-control" placeholder="Label" formControlName="label" >
+            </div>
+
+            <div class="input-group">
+              <label>Begin:</label>
+              <select formControlName="source">
+                  <option *ngFor="let node of graph.nodes" [value]="node.id">{{node.label}}</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>End:</label>
+              <select formControlName="target">
+                <option *ngFor="let node of graph.nodes" [value]="node.id">{{node.label}}</option>
+              </select>
+            </div>
+            <button type="submit" [disabled]="addLineForm.invalid" class="btn btn-default">Add</button>
+        </form>
+      </div>
+      
+
+      <h3 (click)="jsonVisible = !jsonVisible"  style="cursor: pointer">
+        <span [class.arrow-down]="jsonVisible" [class.arrow-right]="!jsonVisible">
+        </span>
+        <strong>JSON</strong>
+      </h3>
+      <textarea [hidden]="!jsonVisible" class="w-100" rows="20" cols="30">{{ NodesJSON }}</textarea>
       <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
         <span [class.arrow-down]="colorVisible" [class.arrow-right]="!colorVisible">
         </span>

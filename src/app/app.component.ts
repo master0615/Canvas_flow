@@ -5,6 +5,7 @@ import chartGroups from './chartTypes';
 import { countries, generateGraph } from './data';
 import { Graph, Layout, ColaForceDirectedLayout, D3ForceDirectedLayout } from './ngx-graph';
 import { colorSets, id } from './ngx-graph/utils';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 
 @Component({
@@ -110,12 +111,16 @@ export class AppComponent implements OnInit {
   schemeType: string = 'ordinal';
   selectedColorScheme: string;
 
+  addNodeForm: FormGroup;
+  editNodeForm: FormGroup;
+  addLineForm: FormGroup;
+  editLineForm: FormGroup;
   constructor() {
     Object.assign(this, {
       countrySet: countries,
       colorSchemes: colorSets,
       chartTypeGroups: chartGroups,
-      graph: generateGraph(6)
+      graph: generateGraph(3)
     });
 
     this.setColorScheme('picnic');
@@ -123,6 +128,17 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+		this.addNodeForm = new FormGroup({
+			label			: new FormControl('', [Validators.required]),
+			color		  : new FormControl('', [Validators.required]),
+    }, []);
+    
+		this.addLineForm = new FormGroup({
+			label			  : new FormControl('', [Validators.required]),
+      source		  : new FormControl('', [Validators.required]),
+      target      : new FormControl('', [Validators.required])  
+    }, []);
+
     this.selectChart(this.chartType);
 
     setInterval(this.updateData.bind(this), 1000);
@@ -130,6 +146,24 @@ export class AppComponent implements OnInit {
     if (!this.fitContainer) {
       this.applyDimensions();
     }
+  }
+
+  addNode() {
+    if (this.addNodeForm.invalid) return;
+    let formValue = this.addNodeForm.getRawValue();
+
+    let new_node: any;
+    new_node = {id: id(), label: formValue.label, data: {color: formValue.color}};
+    this.graph.nodes.push(new_node);
+
+    this.graph.nodes = [...this.graph.nodes];
+    this.addNodeForm.reset();
+  }
+
+  addLine() {
+
+    if (this.addLineForm.invalid) return;
+    this.addLineForm.reset();
   }
 
   updateData() {
@@ -236,6 +270,8 @@ export class AppComponent implements OnInit {
     if (curveType === 'Step Before') {
       this.curve = shape.curveStepBefore;
     }
+
+    console.log(this.curve);
   }
 
   onLayoutChange(layoutId: string) {
@@ -286,4 +322,17 @@ export class AppComponent implements OnInit {
   center() {
     this.center$.next(true);
   }
+
+  get NodesJSON () {
+    return JSON.stringify(this.graph.nodes, undefined, 4);
+  }
+
+  // set NodesJSON (v) {
+  //   try{
+  //     setTimeout(()=>{this.graph.nodes = JSON.parse(v);}, 0);
+  //   }
+  //   catch(e) {
+  //     console.log('error occored while you were typing the JSON');
+  //   };
+  // }
 }
