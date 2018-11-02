@@ -7,7 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgxGraphModule } from './ngx-graph';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-
+import { ContextMenuModule } from 'ngx-contextmenu';
 @NgModule({
   declarations: [
     AppComponent
@@ -20,7 +20,8 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     AppRoutingModule,
     NgbModule,
     NgxChartsModule,
-    NgxGraphModule
+    NgxGraphModule,
+    ContextMenuModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -43,7 +43,7 @@
         </ng-template>
 
         <ng-template #nodeTemplate let-node>
-          <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
+          <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [contextMenu]="basicMenu" [contextMenuSubject]="node" [tooltipTitle]="node.label">
             <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.color" />
             <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">{{node.label}}</svg:text>
           </svg:g>
@@ -185,14 +185,14 @@
 
             <div class="input-group">
               <label>Begin:</label>
-              <select formControlName="source">
-                  <option *ngFor="let node of graph.nodes" [value]="node.id">{{node.label}}</option>
+              <select formControlName="source" (change)="sourceNodeChange($event)">
+                  <option *ngFor="let node of source_nodes" [value]="node.id">{{node.label}}</option>
               </select>
             </div>
             <div class="input-group">
               <label>End:</label>
               <select formControlName="target">
-                <option *ngFor="let node of graph.nodes" [value]="node.id">{{node.label}}</option>
+                <option *ngFor="let node of target_nodes" [value]="node.id">{{node.label}}</option>
               </select>
             </div>
             <button type="submit" [disabled]="addLineForm.invalid" class="btn btn-default">Add</button>
@@ -248,3 +248,10 @@
 
   </div>
 </main>
+
+<context-menu>
+<ng-template contextMenuItem (execute)="deleteNode($event)">
+  Delete Node
+</ng-template>
+
+</context-menu>

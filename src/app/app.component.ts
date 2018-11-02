@@ -1,11 +1,12 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
 import * as shape from 'd3-shape';
 import { Subject } from 'rxjs';
 import chartGroups from './chartTypes';
 import { countries, generateGraph } from './data';
-import { Graph, Layout, ColaForceDirectedLayout, D3ForceDirectedLayout } from './ngx-graph';
+import { Graph, Layout, ColaForceDirectedLayout, D3ForceDirectedLayout, Edge, Node } from './ngx-graph';
 import { colorSets, id } from './ngx-graph/utils';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ContextMenuComponent } from 'ngx-contextmenu';
 
 
 @Component({
@@ -16,6 +17,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 })
 export class AppComponent implements OnInit {
 
+  @ViewChild(ContextMenuComponent) public basicMenu: ContextMenuComponent;
   theme = 'dark';
   chartType = 'directed-graph';
   chartTypeGroups: any;
@@ -41,6 +43,8 @@ export class AppComponent implements OnInit {
   // options
   showLegend = false;
   orientation: string = 'LR'; // LR, RL, TB, BT
+  source_nodes: Node[]=[];
+  target_nodes: Node[]=[];
 
   orientations: any[] = [
     {
@@ -125,6 +129,7 @@ export class AppComponent implements OnInit {
 
     this.setColorScheme('picnic');
     this.setInterpolationType('Bundle');
+    this.getAvailableSourceNodes();
   }
 
   ngOnInit() {
@@ -148,6 +153,30 @@ export class AppComponent implements OnInit {
     }
   }
 
+
+  getAvailableSourceNodes() {
+     this.source_nodes  = this.graph.nodes.filter(node=> 
+          this.graph.edges && (this.graph.edges.filter(edge=>edge.source == node.id || edge.target == node.id).length != this.graph.nodes.length - 1));
+  }
+  getAvailableTargetNodes(source_id) {
+    this.target_nodes = this.graph.nodes.filter(node=> {
+      let edges = this.graph.edges.filter(edge=>edge.source==source_id);
+      console.log(edges);
+      return (edges.length == 0 || edges.findIndex(edge=>edge.target!=node.id) > -1) && node.id !=source_id;
+    });
+  }
+
+  sourceNodeChange(event) {
+    this.getAvailableTargetNodes(event.target.value);
+  }
+
+  deleteNode(event) {
+    let sel_node = event.item;
+    this.graph.nodes = this.graph.nodes.filter(node=> node != sel_node);
+    this.graph.edges = this.graph.edges.filter(edge => edge.source != sel_node.id && edge.target != sel_node.id);
+    this.getAvailableSourceNodes();
+  }
+
   addNode() {
     if (this.addNodeForm.invalid) return;
     let formValue = this.addNodeForm.getRawValue();
@@ -158,11 +187,21 @@ export class AppComponent implements OnInit {
 
     this.graph.nodes = [...this.graph.nodes];
     this.addNodeForm.reset();
+    this.getAvailableSourceNodes();
   }
 
   addLine() {
 
     if (this.addLineForm.invalid) return;
+    let formValue = this.addLineForm.getRawValue();
+
+    let new_edge: any;
+    new_edge = {id: id(), label: formValue.label, source: formValue.source, target: formValue.target};
+    this.graph.edges.push(new_edge);
+    this.graph.edges = [...this.graph.edges];
+    this.graph.nodes = [...this.graph.nodes];
+
+    console.log(this.graph.edges);
     this.addLineForm.reset();
   }
 
